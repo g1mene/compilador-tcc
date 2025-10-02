@@ -1,0 +1,36 @@
+# Arquivos compilados e executáveis
+*.exe
+*.o
+*.obj
+*.out
+*.dll
+*.so
+*.dylib
+
+# Arquivos gerados pelo Flex/Bison
+lex.yy.c
+parser.tab.c
+parser.tab.h
+parser.output
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Arquivos do Visual Studio Code
+.vscode/
+
+# Arquivos de log
+*.log
+
+# Diretórios de build
+build/
+dist/
+bin/
+
+# Arquivos de backup
+*.bak
+*.backup
