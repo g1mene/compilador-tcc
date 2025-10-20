@@ -18,7 +18,7 @@ O processo de verificação de equivalência segue os seguintes passos:
 
 ## Estrutura do Projeto
 - `lexico-flex.l` - Analisador léxico implementado em Flex
-- `parser.y` - Analisador sintático em Bison (a ser implementado)
+- `parser.y` - Analisador sintático em Bison
 - `ast.h/ast.c` - Estruturas e funções para AST (a ser implementado)
 - `cnf.h/cnf.c` - Conversão para CNF (a ser implementado)
 - `sat_interface.h/sat_interface.c` - Interface com SAT solver (a ser implementado)
@@ -30,21 +30,41 @@ O processo de verificação de equivalência segue os seguintes passos:
 - [x] Reconhecimento de operadores lógicos (AND, OR, XOR, NOT)
 - [x] Tratamento de comentários VHDL
 - [x] Reconhecimento de identificadores e números
+- [x] Parsing de expressões lógicas com Bison
 
 ## Como Compilar e Executar
 ```bash
-# Compilar o analisador léxico
-flex lexico-flex.l
-gcc lex.yy.c -o compilador
+#Linux
+# 1) Gerar o parser (Bison)
+bison -d -o parser.tab.c parser.y
 
-# Executar com arquivo de teste
+# 2) Gerar o lexer (Flex)
+flex -o lex.yy.c lexico-flex.l
+
+# 3) Compilar
+gcc parser.tab.c lex.yy.c -o compilador
+
+# 4) Executar com arquivo de teste
 ./compilador < exemplo.vhd
+
+#Windows
+# 1) Gerar o parser (Bison)
+win_bison -d parser.y
+
+# 2) Gerar o lexer (Flex)
+win_flex --outfile=lex.yy.c lexico-flex.l
+
+# 3) Compilar
+gcc -o parser lex.yy.c parser.tab.c -lm
+
+# 4) Executar com arquivo de teste
+.\parser.exe exemplo.vhd
 ```
 
 ## TODO
 - [x] **Análise léxica**: Reconhecimento de tokens VHDL com Flex
-- [ ] **Parsing VHDL**: Implementar gramática Bison para expressões lógicas
-- [ ] **Construção da AST**: Definir estruturas de nós e ações semânticas no Bison para construir árvore sintática
+- [x] **Parsing VHDL**: Analisador sintático com Bison implementado
+- [ ] **Construção da AST**: Criar estrutura de dados para árvore sintática abstrata
 - [ ] **Tradução para fórmulas booleanas**: Converter AST em expressões lógicas padronizadas
 - [ ] **Transformação para CNF**: Implementar conversão para forma normal conjuntiva
 - [ ] **Geração do problema de equivalência**: Criar fórmula `c1 XOR c2 = 0`
@@ -55,7 +75,7 @@ gcc lex.yy.c -o compilador
 - **Nome:** Gabriel Gimenez Vieira
 - **Curso:** Engenharia de Computação
 - **Universidade:** Universidade Tecnologica Federal do Paraná - UTFPR
-- **Orientador:** Prof. Dr. Ricardo T. Olivieira
+- **Orientador:** Prof. Dr. Ricardo T. Oliveira
 
 ## Cronograma
 - **Fase 1:** Análise léxica e sintática de VHDL
@@ -65,4 +85,4 @@ gcc lex.yy.c -o compilador
 - **Fase 5:** Testes e validação com circuitos reais
 
 ---
-*Última atualização: Setembro 2025*
+*Última atualização: Outubro 2025*
