@@ -1,37 +1,16 @@
 %{
 #include <stdio.h>
-#include "parser.tab.h"
-#include <string.h>
+#include <stdlib.h>
+#include "ast.h"
 
-// Um simbolo da tabela de simbolos é um id e seu endereço
-typedef struct {
-    char *id;
-    int end;
-} simbolo;
-
-// Vetor de simbolos (a tabela de simbolos em si)
-simbolo tabsimb[1000];
-int nsimbs = 0;
-
-// Dado um ID, busca na tabela de simbolos o endereço respectivo
-int getendereco(char *id) {
-    for (int i=0;i<nsimbs;i++)
-        if (!strcmp(tabsimb[i].id, id))
-            return tabsimb[i].end;
-    printf("Erro semantico"); // imprime o erro semantico
-    exit(1);
-}
-
-int T=0; // Temporario
-int label=0;
-int labelfinal=1;
-
-char *operadoratual; // string literal ser usada no operador e em comparacoes
-
+Node *root;
+int yylex(void);
+void yyerror(const char *s);
 %}
 
-/* o union lista os tipos que o texto/valor de um token pode ter */
+/* Definir os tipos da união */
 %union {
+    struct Node *node;
     char *str_val;
     int int_val;
 }
@@ -39,14 +18,9 @@ char *operadoratual; // string literal ser usada no operador e em comparacoes
 /* indicação do tipo do texto/valor de um token, conforme o union. */
 %token <str_val> ID
 %token <int_val> NUM
-%token ATRIB PEV LPAR RPAR AND OR XOR NOT
+%token ATRIB AND OR XOR NOT LPAR RPAR PEV
 
-%type <int_val> expr
-%type <int_val> expr_or
-%type <int_val> expr_xor
-%type <int_val> expr_and
-%type <int_val> expr_not
-
+%type <node> programa declaracoes declaracao expr expr_or expr_xor expr_and expr_not
 
 /* mostra detalhes do erro de sintaxe */
 %define parse.error verbose
@@ -54,79 +28,66 @@ char *operadoratual; // string literal ser usada no operador e em comparacoes
 %%
 
 // Regras para ler o exemplo completo
-programa : declaracoes
-         ;
+programa
+    : declaracoes                { root = $1; }
+    ;
 
-declaracoes : declaracoes declaracao
-            | declaracao
-            ;
+declaracoes
+    : declaracao                 { $$ = $1; }
+    | declaracoes declaracao     { $$ = makeNode("DECLS", NULL, 2, $1, $2); }
+    ;
 
 // Regras gramaticais
-declaracao : ID ATRIB expr PEV
-                       {
-                           printf("Declaracao reconhecida: %s <= ... ;\n", $1);
-                       }
-                       ;
+declaracao
+    : ID ATRIB expr PEV          { $$ = makeNode("DECLARACAO", $1, 1, $3); }
+    ;
 
-expr : expr_or;
+expr
+    : expr_or                    { $$ = $1; }
+    ;
 
-expr_or : expr_or OR expr_xor
-        {
-            operadoratual = "or";
-            printf("%s %%t%d, %%t%d, %%t%d\n", operadoratual, T, $1, $3);
-            $$ = T++;
-        }
-        |
-        expr_xor { $$ = $1;};
+expr_or
+    : expr_or OR expr_xor        { $$ = makeNode("OR", NULL, 2, $1, $3); }
+    | expr_xor                   { $$ = $1; }
+    ;
 
-expr_xor : expr_xor XOR expr_and
-        {
-            operadoratual = "xor";
-            printf("%s %%t%d, %%t%d, %%t%d\n", operadoratual, T, $1, $3);
-            $$ = T++;
-        }
-        | expr_and { $$ = $1;};
+expr_xor
+    : expr_xor XOR expr_and      { $$ = makeNode("XOR", NULL, 2, $1, $3); }
+    | expr_and                   { $$ = $1; }
+    ;
 
-expr_and : expr_and AND expr_not
-        {
-            operadoratual = "and";
-            printf("%s %%t%d, %%t%d, %%t%d\n", operadoratual, T, $1, $3);
-            $$ = T++;
-        }
-        | expr_not { $$ = $1;};
+expr_and
+    : expr_and AND expr_not      { $$ = makeNode("AND", NULL, 2, $1, $3); }
+    | expr_not                   { $$ = $1; }
+    ;
 
-expr_not : NOT expr_not
-        {
-            operadoratual = "not";
-            printf("%s %%t%d, %%t%d\n", operadoratual, T, $2);
-            $$ = T++;
-        }
-        | LPAR expr RPAR { $$ = $2; }
-        | ID
-        {
-            printf("load %%t%d, %s\n", T, $1);
-            $$ = T++;
-        }
-        | NUM
-        {
-            printf("loadi %%t%d, %d\n", T, $1);
-            $$ = T++;
-        }
-        ;
-
+expr_not
+    : NOT expr_not               { $$ = makeNode("NOT", NULL, 1, $2); }
+    | LPAR expr RPAR             { $$ = $2; }
+    | ID                         { $$ = makeNode("ID", $1, 0); }
+    | NUM                        { 
+        char buffer[20];
+        sprintf(buffer, "%d", $1);
+        $$ = makeNode("NUM", buffer, 0); 
+      }
+    ;
 %%
 
  extern FILE *yyin;                   // (*) descomente para ler de um arquivo
 
 int main(int argc, char *argv[]) {
-
+    
     yyin = fopen(argv[1], "r");       // (*)
 
     yyparse();
+
+    printAST(root, 0);
+
+    freeAST(root);
 
     fclose(yyin);                     // (*)
 
     return 0;
 }
 
-void yyerror(char *s) { fprintf(stderr,"ERRO: %s\n", s); }
+void yyerror(const char *s) { fprintf(stderr,"ERRO: %s\n", s); }

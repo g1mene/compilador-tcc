@@ -19,7 +19,7 @@ O processo de verificação de equivalência segue os seguintes passos:
 ## Estrutura do Projeto
 - `lexico-flex.l` - Analisador léxico implementado em Flex
 - `parser.y` - Analisador sintático em Bison
-- `ast.h/ast.c` - Estruturas e funções para AST (a ser implementado)
+- `ast.h/ast.c` - Estruturas e funções para AST
 - `cnf.h/cnf.c` - Conversão para CNF (a ser implementado)
 - `sat_interface.h/sat_interface.c` - Interface com SAT solver (a ser implementado)
 - `exemplo.vhd` - Arquivo de exemplo em VHDL para testes
@@ -31,6 +31,7 @@ O processo de verificação de equivalência segue os seguintes passos:
 - [x] Tratamento de comentários VHDL
 - [x] Reconhecimento de identificadores e números
 - [x] Parsing de expressões lógicas com Bison
+- [x] Construção da AST (ast.h / ast.c)
 
 ## Como Compilar e Executar
 ```bash
@@ -64,8 +65,7 @@ gcc -o parser lex.yy.c parser.tab.c -lm
 ## TODO
 - [x] **Análise léxica**: Reconhecimento de tokens VHDL com Flex
 - [x] **Parsing VHDL**: Analisador sintático com Bison implementado
-- [ ] **Construção da AST**: Criar estrutura de dados para árvore sintática abstrata
-- [ ] **Tradução para fórmulas booleanas**: Converter AST em expressões lógicas padronizadas
+- [x] **Construção da AST**: Estruturas e funções implementadas (`ast.h`, `ast.c`)
 - [ ] **Transformação para CNF**: Implementar conversão para forma normal conjuntiva
 - [ ] **Geração do problema de equivalência**: Criar fórmula `c1 XOR c2 = 0`
 - [ ] **Integração com SAT solver**: Conectar com solver existente (MiniSAT/Z3)
@@ -85,4 +85,4 @@ gcc -o parser lex.yy.c parser.tab.c -lm
 - **Fase 5:** Testes e validação com circuitos reais
 
 ---
-*Última atualização: Outubro 2025*
+*Última atualização: Novembro 2025*

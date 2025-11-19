@@ -30,4 +30,3 @@
 .                       { printf("Erro léxico: %s\n", yytext); exit(1); }
 
 %%
-
