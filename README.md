@@ -56,7 +56,7 @@ win_bison -d parser.y
 win_flex --outfile=lex.yy.c lexico-flex.l
 
 # 3) Compilar
-gcc -o parser lex.yy.c parser.tab.c -lm
+gcc -o parser lex.yy.c parser.tab.c ast.c -lm
 
 # 4) Executar com arquivo de teste
 .\parser.exe exemplo.vhd
