@@ -20,21 +20,16 @@ void yyerror(const char *s);
 %token <int_val> NUM
 %token ATRIB AND OR XOR NOT LPAR RPAR PEV
 
-%type <node> programa declaracoes declaracao expr expr_or expr_xor expr_and expr_not
+%type <node> declaracoes declaracao expr expr_or expr_xor expr_and expr_not
 
 /* mostra detalhes do erro de sintaxe */
 %define parse.error verbose
 
 %%
 
-// Regras para ler o exemplo completo
-programa
-    : declaracoes                { root = $1; }
-    ;
-
+// Aceita exatamente duas declaracoes
 declaracoes
-    : declaracao                 { $$ = $1; }
-    | declaracoes declaracao     { $$ = makeNode("DECLS", NULL, 2, $1, $2); }
+    : declaracao declaracao     { $$ = makeNode("XOR", NULL, 2, $1, $2); root = $$; }
     ;
 
 // Regras gramaticais
@@ -73,21 +68,34 @@ expr_not
     ;
 %%
 
- extern FILE *yyin;                   // (*) descomente para ler de um arquivo
+extern FILE *yyin;
 
 int main(int argc, char *argv[]) {
-    
-    yyin = fopen(argv[1], "r");       // (*)
+    if (argc != 2) {
+        fprintf(stderr, "Uso: %s arquivo.vhd\n", argv[0]);
+        return EXIT_FAILURE;
+    }
 
-    yyparse();
+    yyin = fopen(argv[1], "r");
+    if (!yyin) {
+        perror(argv[1]);
+        return EXIT_FAILURE;
+    }
 
+    int status = yyparse();
+    fclose(yyin);
+    if (status != 0) {
+        fprintf(stderr, "O arquivo deve conter exatamente duas declaracoes validas.\n");
+        freeAST(root);
+        return EXIT_FAILURE;
+    }
+
+    assertTrue(root);
     printAST(root, 0);
-
+    printf("\nCNF:\n");
+    printCNF(root);
     freeAST(root);
-
-    fclose(yyin);                     // (*)
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void yyerror(const char *s) { fprintf(stderr,"ERRO: %s\n", s); }
