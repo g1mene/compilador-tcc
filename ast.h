@@ -29,6 +29,7 @@ void printAST(Node *node, int indent);
 void assertTrue(Node *node);
 /* Imprime as clausulas armazenadas, incluindo a unidade se adicionada. */
 void printCNF(const Node *node);
+void printDIMACS(const Node *node);
 void freeAST(Node *node);
 
 #endif

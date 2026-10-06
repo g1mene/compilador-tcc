@@ -174,6 +174,38 @@ void printCNF(const Node *node) {
     printf("\n");
 }
 
+/* Numera nomes iguais igualmente, usando busca linear por simplicidade. */
+void printDIMACS(const Node *node) {
+    if (!node) return;
+    const char **variables = checkedAlloc(sizeof(char *) *
+                                         ((size_t)node->numClauses * 3 + 1));
+    int count = 0;
+    for (int i = 0; i < node->numClauses; i++) {
+        const Clause *clause = &node->clauses[i];
+        for (int j = 0; j < clause->size; j++) {
+            const char *name = clause->literals[j].variable;
+            int k = 0;
+            while (k < count && strcmp(variables[k], name) != 0) k++;
+            if (k == count) variables[count++] = name;
+        }
+    }
+    for (int i = 0; i < count; i++)
+        printf("c %d %s\n", i + 1, variables[i]);
+    printf("p cnf %d %d\n", count, node->numClauses);
+    for (int i = 0; i < node->numClauses; i++) {
+        const Clause *clause = &node->clauses[i];
+        for (int j = 0; j < clause->size; j++) {
+            Literal lit = clause->literals[j];
+            int k = 0;
+            while (k < count && strcmp(variables[k], lit.variable) != 0) k++;
+            int number = k + 1;
+            printf("%d ", lit.negated ? -number : number);
+        }
+        printf("0\n");
+    }
+    free(variables);
+}
+
 void freeAST(Node *node) {
     if (!node) return;
     free(node->type);

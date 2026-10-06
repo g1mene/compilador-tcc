@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 
 Node *root;
@@ -71,8 +72,8 @@ expr_not
 extern FILE *yyin;
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Uso: %s arquivo.vhd\n", argv[0]);
+    if (argc < 2 || argc > 3 ||
+        (argc == 3 && strcmp(argv[2], "--dimacs") != 0)) {
         return EXIT_FAILURE;
     }
 
@@ -91,10 +92,9 @@ int main(int argc, char *argv[]) {
     }
 
     assertTrue(root);
-    printAST(root, 0);
-    printf("\nCNF:\n");
-    printCNF(root);
+    printDIMACS(root);
     freeAST(root);
+    if (fflush(stdout) == EOF || ferror(stdout)) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
 
