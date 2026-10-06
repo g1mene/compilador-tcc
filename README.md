@@ -20,7 +20,7 @@ O processo de verificação de equivalência segue os seguintes passos:
 - `lexico-flex.l` - Analisador léxico implementado em Flex
 - `parser.y` - Analisador sintático em Bison
 - `ast.h/ast.c` - Estruturas e funções para AST
-- `cnf.h/cnf.c` - Conversão para CNF (a ser implementado)
+- `cnf.h/cnf.c` - Conversão para CNF
 - `sat_interface.h/sat_interface.c` - Interface com SAT solver (a ser implementado)
 - `exemplo.vhd` - Arquivo de exemplo em VHDL para testes
 - `tests/` - Diretório com casos de teste (a ser criado)
@@ -60,15 +60,19 @@ gcc -o parser lex.yy.c parser.tab.c ast.c -lm
 
 # 4) Executar com arquivo de teste
 .\parser.exe exemplo.vhd
+
+# 4.5) Salvar em arquivo e executar Z3 Solver
+.\parser.exe exemplo.vhd | Set-Content -Encoding Ascii exemplo.cnf
+.\z3-5.1.0-x64-win\bin\z3.exe -dimacs exemplo.cnf
 ```
 
 ## TODO
 - [x] **Análise léxica**: Reconhecimento de tokens VHDL com Flex
 - [x] **Parsing VHDL**: Analisador sintático com Bison implementado
 - [x] **Construção da AST**: Estruturas e funções implementadas (`ast.h`, `ast.c`)
-- [ ] **Transformação para CNF**: Implementar conversão para forma normal conjuntiva
-- [ ] **Geração do problema de equivalência**: Criar fórmula `c1 XOR c2 = 0`
-- [ ] **Integração com SAT solver**: Conectar com solver existente (MiniSAT/Z3)
+- [x] **Transformação para CNF**: Implementar conversão para forma normal conjuntiva
+- [x] **Geração do problema de equivalência**: Criar fórmula `c1 XOR c2 = 0`
+- [ ] **Integração com SAT solver**: Conectar com solver existente (Z3)
 - [ ] **Testes de validação**: Verificar com circuitos de equivalência conhecida
 
 ## Autor
@@ -85,4 +89,4 @@ gcc -o parser lex.yy.c parser.tab.c ast.c -lm
 - **Fase 5:** Testes e validação com circuitos reais
 
 ---
-*Última atualização: Novembro 2025*
+*Última atualização: Outubro 2026*
